@@ -1,0 +1,345 @@
+
+// based on the mapping information, build contigs 
+void createcontig() {
+
+
+  // output files
+  char outfile[200]; // prefix of output files
+  strcpy(outfile, mmcallinfo->outprefix);
+  FILE *outbaseprof = fopen(strcat(outfile, ".prof"), "w");
+
+  strcpy(outfile, mmcallinfo->outprefix);
+  FILE *outcontig = fopen(strcat(outfile, ".contig"), "w");
+
+  strcpy(outfile, mmcallinfo->outprefix);
+  FILE *outnewref = fopen(strcat(outfile, ".newref"), "w");
+  /******************************************************************************/
+
+  
+  char bases[7] = "ACGT-N";
+  int i = 0;
+  int gap = 1;
+
+  int newrefnum = 0;
+  int prei = 0;
+  int preseqnum = 0;
+
+  // if contig ends at locus L of the reference, for the new reference sequence
+  // we use the contig plus additional 100bp if possible
+  const int MOREBASENUM = 100; 
+  int morebase = -1;          // keep track of how many more bases have been used
+  
+  
+
+  // read each base of reference
+  for (i = 0; i < subjectmultiseq->totallength; i++) {
+
+
+
+    /*
+      depth of coverage == 0, end of current contig
+      This block of code tries to extend the contig by MOREBASENUM base pairs
+      to create the new reference for potential next generation
+    */
+    if (matchprocessinfotmp.depcov[i] == 0) {
+
+      gap = 1; // next base is potentially a new contig
+
+      if (morebase >= 0 && morebase < MOREBASENUM) {
+	
+	// the reference base char
+	char base = 'a';
+	switch (subjectmultiseq->sequence[i]) {
+	case 'a': base = 'A';
+	  break;
+	case 'c': base = 'C';
+	  break;
+	case 'g': base = 'G';
+	  break;
+	case 't': base = 'T';
+	  break;
+	case UCHAR_MAX: base = 'x';
+	  break;
+	default:  base = 'N';
+	  break;
+	}
+
+	// this is the end of a reference sequence
+	// end of extending the contig for new reference seqs
+	if (base == 'x') {
+	  morebase = MOREBASENUM;
+	  continue;
+	}
+
+	// print extended ref seq in a separate line from the contig
+	if (morebase == 0) {
+	  fprintf(outnewref, "\n");	
+	}
+
+	// print out the base
+	fprintf(outnewref, "%c", base);	
+	morebase++;
+
+	prei = i;
+	
+      }
+      continue;
+    }
+    /******************************************************************************/
+
+
+    
+    // convert dna base to number
+    unsigned char k = 4;
+    switch (subjectmultiseq->sequence[i]) {
+    case 'a': k = 0;
+      break;
+    case 'c': k = 1;
+      break;
+    case 'g': k = 2;
+      break;
+    case 't': k = 3;
+      break;
+    default:  k = 4;
+      break;
+    }
+    /******************************************************************************/
+    
+
+    
+    // depth cov of ref base
+    int dep = matchprocessinfotmp.depcov[i]
+      - matchprocessinfotmp.baseprof[i*5]
+      - matchprocessinfotmp.baseprof[i*5+1]
+      - matchprocessinfotmp.baseprof[i*5+2]
+      - matchprocessinfotmp.baseprof[i*5+3]
+      - matchprocessinfotmp.baseprof[i*5+4];
+
+
+
+    // start of a new contig
+    int loclocal = 0;
+    int linesize = 0;          // # bases printed in current line
+    char contigname[200] = ""; 
+    int contignum = 0;         // contig names are numbered
+    if (gap == 1) {
+      gap = 0;
+      
+      loclocal = 0;
+      linesize = 0;
+      *contigname = '\0';
+
+      if (contignum != 0) {
+	fprintf(outcontig, "\n");
+      }
+
+      fprintf(outcontig, ">contig%d ", contignum++ + 1);
+
+      // i is the locus of the current base in the concatenated ref string
+      // refseqnum is the number of references
+      // loclocal is the locus of the current base in the ref seq
+      int refseqnum = searchrefloc(i, &loclocal);
+
+      int descs = subjectmultiseq->startdesc[refseqnum];  // start of description
+      int desce = subjectmultiseq->startdesc[refseqnum+1];  // end of description
+      Uchar *descref = subjectmultiseq->descspace.spaceUchar + descs;
+      int n = 0;
+      for(n=0; n< desce - descs + 1; n++) {
+	if(isspace((int) descref[n]))
+	  break;
+	fprintf(outcontig, "%c", descref[n]);
+	contigname[n] = descref[n];
+      }
+
+      
+      fprintf(outcontig, " %d\n", loclocal + 1);
+
+      fprintf(outbaseprof, ">%s\n", contigname);
+
+      if (contignum == 1) {
+	fprintf(outnewref, ">newref%d\n", newrefnum++ + 1);
+	int k = 0;
+	for (k = 0; k < 100 && i-1-k >= 0; k++) {
+	  fprintf(outnewref, "%c", subjectmultiseq->sequence[i-1-k]);
+	}
+	fprintf(outnewref, "\n");
+
+      }
+      else {
+	if (preseqnum != refseqnum) {
+	  fprintf(outnewref, "\n>newref%d\n", newrefnum++ + 1);
+	  int k = 0;
+	  for (k = 0; k < 100; k++) {
+	    if (subjectmultiseq->sequence[i-1-k] == UCHAR_MAX) {
+	      break;
+	    }
+	    else {
+	      fprintf(outnewref, "%c", subjectmultiseq->sequence[i-1-k]);
+	    }
+	  }
+	  if (k > 0)
+	    fprintf(outnewref, "\n");
+	}
+	else {
+	  if (morebase < MOREBASENUM) {
+	    //fprintf(outnewref, "hello\n");
+	    fprintf(outnewref, "\n");
+	  }
+	  else {
+	    // add in some code
+	    if (i - prei <= MOREBASENUM) {
+	      fprintf(outnewref, "\n");
+	      int k = prei + 1;
+	      for (k = prei+1; k < i; k++) {
+		fprintf(outnewref, "%c", subjectmultiseq->sequence[k]);
+	      }
+	      fprintf(outnewref, "\n");
+	    }
+	    else {
+	      fprintf(outnewref, "\n>newref%d\n", newrefnum++ + 1);
+	      int k = 0;
+	      for (k = 0; k < 100; k++) {
+		fprintf(outnewref, "%c", subjectmultiseq->sequence[i-1-k]);
+	      }
+	      fprintf(outnewref, "\n");
+	    }	      
+	  }
+	}
+      }
+      preseqnum = refseqnum;
+      morebase = 0;
+    }
+
+
+    // the most abundant base
+    // used as the consensus
+    int basenum = k;
+    int maxdep = dep;
+    int j = 0;
+    for (j = 0; j < 5; j++) {
+      if (matchprocessinfotmp.baseprof[i*5+j] >= maxdep) {
+	basenum = j;
+	maxdep = matchprocessinfotmp.baseprof[i*5+j];
+      }
+    }
+
+    
+    if (++linesize > 100) {
+      linesize = 1;
+      fprintf(outcontig, "\n");
+      fprintf(outnewref, "\n");
+    }
+
+    // insertions in ref; deletions in query
+    // do not print
+    if (basenum == 4) {
+      --linesize;
+    }
+    else {
+      fprintf(outcontig, "%c", bases[basenum]);
+      fprintf(outnewref, "%c", bases[basenum]);
+      if (matchprocessinfotmp.insertnum[i] > 0) {
+	//printf("insertions %d %d\n", i, matchprocessinfotmp.insertnum[i]);
+	int m = 0;
+	// for each insertion
+	for (m = 0; m < matchprocessinfotmp.insertnum[i]; m++) { 
+	  int n = 0;
+	  // for each base
+	  for (n = 0; n < 4; n++) {
+	    if (matchprocessinfotmp.insertions[i*40+m*4+n] > matchprocessinfotmp.depcov[i] / 2) {
+	      //printf("insertions %d %d %d %d\n", i, m, n, matchprocessinfotmp.insertions[i*40+m*4+n]);
+	      fprintf(outcontig, "%c", bases[n]);
+	      fprintf(outnewref, "%c", bases[n]);
+	      ++linesize;
+	      break;
+	    }
+	  }
+	}
+      }
+      
+    }
+
+
+    // print out base profile
+    matchprocessinfotmp.baseprof[i*5+k] = dep; // depth coverage of ref base
+    //fprintf(outbaseprof, "%s\t%d\t%d\t", contigname, loclocal++ +1, matchprocessinfotmp.depcov[i]); // this output style is too big
+    fprintf(outbaseprof, "%d\t%d\t", loclocal++ +1, matchprocessinfotmp.depcov[i]);
+    fprintf(outbaseprof, "%c\t", bases[k]);
+    j = 0;
+    for (j = 0; j < 5; j++) {
+      fprintf(outbaseprof, "%c,%d\t", bases[j], matchprocessinfotmp.baseprof[i*5+j]);
+    }
+    fprintf(outbaseprof, "\n");
+
+    if (matchprocessinfotmp.insertnum[i] > 0) {
+      //printf("insertions %d %d\n", i, matchprocessinfotmp.insertnum[i]);
+      int m = 0;
+      // for each insertion
+      for (m = 0; m < matchprocessinfotmp.insertnum[i]; m++) {
+	int insdep = matchprocessinfotmp.insertions[i*40+m*4]
+	  + matchprocessinfotmp.insertions[i*40+m*4+1]
+	  + matchprocessinfotmp.insertions[i*40+m*4+2]
+	  + matchprocessinfotmp.insertions[i*40+m*4+3];
+
+	fprintf(outbaseprof, "%d.%d\t%d\t-\t", loclocal, m+1, insdep);
+	int n = 0;
+	// for each base
+	for (n = 0; n < 4; n++) {
+	  fprintf(outbaseprof, "%c,%d\t", bases[n], matchprocessinfotmp.insertions[i*40+m*4+n]);
+	}
+	fprintf(outbaseprof, "-,0\n");
+      }
+    }
+  }
+  fprintf(outcontig, "\n");
+  fprintf(outnewref, "\n");
+  fclose(outbaseprof);
+  fclose(outcontig);
+  fclose(outnewref);
+}
+
+int searchrefloc (int locglobal, int *loclocal) {
+
+  int refseqnum = -2;
+  int ranges = 0;
+  int rangee = (matchprocessinfotmp.reflocnum - 1)*2;
+  int *locptr = matchprocessinfotmp.refloc;
+  
+  while (refseqnum == -2) {
+
+    if (rangee == ranges) {                              // only one element left
+	  
+      int refs = locptr[ranges];
+      int refe = locptr[ranges+1];
+      if (locglobal >= refs && locglobal <= refe) {                // loc is within
+	*loclocal = locglobal - refs;
+	refseqnum = ranges/2;
+      }
+      else {                                             // loc is NOT within, wrong
+	refseqnum = -1;
+      }
+    }
+    
+    else {
+      int mid = (rangee + ranges) / 2;
+      if (mid % 2 == 1) {                                // odd number of elements
+	mid--;
+      }
+
+      int refs = locptr[mid];
+      int refe = locptr[mid+1];
+      if (locglobal >= refs && locglobal <= refe) {                // loc is within
+	*loclocal = locglobal - refs;
+	refseqnum = mid/2;
+      }
+      else if (locglobal < locptr[mid]) {
+	rangee = mid - 2;
+      }
+      else {
+	ranges = mid + 2;
+      }
+    }
+  }
+  if (refseqnum == -1)
+    return 0;
+}
