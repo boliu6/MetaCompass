@@ -60,10 +60,9 @@ $cmd = "./src/metaphyler/installMetaphyler.pl";
 print "$cmd\n\n";
 system($cmd);
 
-$cmd = "g++ -Wall -W -O2 -o ./bin/extractSeq ./refseq/extractSeq.cpp";
+$cmd = "g++ -Wall -W -O2 -o ./bin/extractSeq ./src/utils/extractSeq.cpp";
 print "$cmd\n\n";
 system($cmd);
-
 
 
 $cmd = "g++ -Wall -W -O2 -o ./bin/buildcontig src/buildcontig/buildcontig.cpp src/buildcontig/cmdoptions.cpp src/buildcontig/memory.cpp src/buildcontig/procmaps.cpp src/buildcontig/outputfiles.cpp";

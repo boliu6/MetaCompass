@@ -2,13 +2,11 @@
 
 #############################################
 #
-# Program: Given a set of metagenomic sequences,
-#          pick reference genomes for
-#          comparative assembly.
+# Program: Pick reference genomes using MetaPhyler.
 #
 # Author: Bo Liu, boliu@umiacs.umd.edu
 #
-# Thu Mar 22 15:32:47 EDT 2012
+# Tue Aug  7 21:19:05 EDT 2012
 #
 #############################################
 
@@ -35,21 +33,21 @@ my $cmd = "";
 
 # run metaphyler
 print STDERR "# Run MetaPhyler\n";
-$cmd = "perl $Bin/metaphyler/runMetaphyler.pl $fastafile $prefix $nthreads";
+$cmd = "perl $Bin/../src/metaphyler/metaphyler.pl $fastafile $prefix $nthreads";
 print STDERR "$cmd\n";
 system($cmd);
 print STDERR "\n";
 
 # select reference genomes
 print STDERR "Pick reference genomes based on MetaPhyler output\n";
-$cmd = "perl $Bin/refseq/pickrefids.pl $prefix.blastn 1 > $prefix.refseq.ids";
+$cmd = "perl $Bin/pickrefids.pl $prefix.blastn 1 > $prefix.refseq.ids";
 print STDERR "$cmd\n";
 system($cmd);
 print STDERR "\n";
 
 
 print STDERR "Extract reference genome sequences\n";
-$cmd = "$Bin/refseq/extractSeq $Bin/refseq/bacgeno.fna $prefix.refseq.ids > $prefix.refseq.fna";
+$cmd = "$Bin/extractSeq $Bin/../refseq/bacgeno.fna $prefix.refseq.ids > $prefix.refseq.fna";
 print STDERR "$cmd\n";
 system($cmd);
 print STDERR "\n";
