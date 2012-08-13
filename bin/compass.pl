@@ -6,7 +6,7 @@
 #
 # Author: Bo Liu, boliu@umiacs.umd.edu
 #
-# Thu Mar 22 15:32:47 EDT 2012
+# Sun Aug 12 16:12:16 EDT 2012
 #
 #############################################
 
@@ -23,9 +23,10 @@ my $reffile = "";
 my $prefix = 0;
 my $program = "";
 my $nthreads = 0;
-if (scalar @ARGV == 5) {
+my $niter = 3;
+if (scalar @ARGV == 6) {
 
-    ($fastafile, $reffile, $prefix, $program, $nthreads) = @ARGV;
+    ($fastafile, $reffile, $prefix, $program, $niter, $nthreads) = @ARGV;
 
 } else {
     Usage();
@@ -35,13 +36,13 @@ if (scalar @ARGV == 5) {
 
 if ($program eq "mummer-map") {
 
-    for (my $i = 1; $i <= 3; ++$i) {
+    for (my $i = 1; $i <= $niter; ++$i) {
 
 	print STDERR "### iteration ",  $i, " ###\n";
 
 	if ($i != 1) { my $j = $i - 1; $reffile = "$prefix." . $j . ".newref"; }
 	
-	my $cmd = "$Bin/mummer-map/mummer-map -o $prefix.$i -p $nthreads $reffile $fastafile";
+	my $cmd = "$Bin/../src/mummer-map/mummer-map -o $prefix.$i -p $nthreads $reffile $fastafile";
 	print STDERR "Run mummer-map read mapping\n";
 	print STDERR "$cmd\n";
 	system($cmd);
@@ -49,7 +50,7 @@ if ($program eq "mummer-map") {
 	
 	my $pickref = "breadth";
 	if ($i != 1) {$pickref = "all";}
-	$cmd = "$Bin/buildcontig/buildcontig -m $prefix.$i.map -r $reffile -o $prefix.$i -c 1 -l 150 -n T -b F -k $pickref";
+	$cmd = "$Bin/buildcontig -m $prefix.$i.map -r $reffile -o $prefix.$i -c 1 -l 150 -n T -b F -k $pickref";
 	print STDERR "# Build contigs\n";
 	print STDERR "$cmd\n";
 	system($cmd);
@@ -58,7 +59,7 @@ if ($program eq "mummer-map") {
 }
 else {
     
-    for (my $i = 1; $i <= 3; ++$i) {
+    for (my $i = 1; $i <= $niter; ++$i) {
 
 	print STDERR "### iteration ",  $i, " ###\n";
 
@@ -76,7 +77,7 @@ else {
 
 	my $pickref = "breadth";
 	if ($i != 1) {$pickref = "all";}
-	$cmd = "$Bin/buildcontig/buildcontig -s $prefix.$i.bowtie2 -r $reffile -o $prefix.$i -c 1 -l 150 -n T -b F -k $pickref";
+	$cmd = "$Bin/buildcontig -s $prefix.$i.bowtie2 -r $reffile -o $prefix.$i -c 1 -l 150 -n T -b F -k $pickref";
 	print STDERR "# Build contigs\n";
 	print STDERR "$cmd\n";
 	system($cmd);
@@ -93,13 +94,14 @@ exit;
 sub Usage {
     die("
 Usage:
-       perl metaCompass.pl <FASTA> <reference> <prefix> <program> <# threads>
+       perl compass.pl <FASTA> <reference> <prefix> <mapping> <# iterations> <# threads>
 
 Options:
        <FASTA>        DNA reads in FASTA format.
        <reference>    Reference sequences in FASTA format.
        <prefix>       Output file prefix.
-       <program>      mummer-map or bowtie2 (specify the DIRECTORY of bowtie2 package).
+       <mapping>      mummer-map or bowtie2 (specify the DIRECTORY of bowtie2 package).
+       <# iterations>  # iterations to run comparative assembly. 3 is recommended.
        <# threads>    # threads to run read mapping.
 
 Output:

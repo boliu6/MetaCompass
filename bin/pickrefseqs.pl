@@ -39,14 +39,14 @@ system($cmd);
 print STDERR "\n";
 
 # select reference genomes
-print STDERR "Pick reference genomes based on MetaPhyler output\n";
+print STDERR "# Pick reference genomes based on MetaPhyler output\n";
 $cmd = "perl $Bin/pickrefids.pl $prefix.blastn 1 > $prefix.refseq.ids";
 print STDERR "$cmd\n";
 system($cmd);
 print STDERR "\n";
 
 
-print STDERR "Extract reference genome sequences\n";
+print STDERR "# Extract reference genome sequences\n";
 $cmd = "$Bin/extractSeq $Bin/../refseq/bacgeno.fna $prefix.refseq.ids > $prefix.refseq.fna";
 print STDERR "$cmd\n";
 system($cmd);

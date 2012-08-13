@@ -1,0 +1,2 @@
+perl metacompass.pl test/mockstg.1m.fna test/mockstg.1m /cbcb/personal-scratch/boliu/software/bowtie2-2.0.0-beta5 1 5
+

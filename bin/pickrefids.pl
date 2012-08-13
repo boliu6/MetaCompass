@@ -7,7 +7,7 @@
 #
 # Author: Bo Liu, boliu@umiacs.umd.edu
 #
-# Fri Mar  9 23:24:30 EST 2012
+# Fri Aug 10 18:12:01 EDT 2012
 #
 #############################################
 
@@ -32,10 +32,10 @@ if (scalar @ARGV == 2) {
 #----------------------------------------#
 # information of reference genomes
 #----------------------------------------#
-my %seq2tid = ();
-my %tid2seqs = ();
-my %tid2name = ();
-my %tid2sp = ();
+my %seq2tid = ();    # sequence id to taxonomy id
+my %tid2seqs = ();   # taxonomy id to sequences
+my %tid2name = ();   # tax id to name
+my %tid2sp = ();     # tax id to species id
 open(FH, "$Bin/../refseq/tid2par.tab") or die("Could not open $Bin/tid2par.tab\n");
 foreach my $line (<FH>) {
     chomp $line;
@@ -53,7 +53,7 @@ close FH;
 #----------------------------------------#
 # abundance for each reference genome
 #----------------------------------------#
-my %tid2num = ();
+my %tid2num = ();   # # of reads classified within each tax id
 # read tab delimited file
 open(FH, "$blast") or die("Could not open $blast.\n");
 foreach my $line (<FH>) {
@@ -62,7 +62,6 @@ foreach my $line (<FH>) {
     if ($pct < 90 || $hspl < 60) { next;}
     $rid =~ /^(\S+)\_\d+\_\d+$/;
     $rid = $1;
-#    print "$rid\n";
     my $tid = $seq2tid{$rid};
     $tid2num{$tid}++;
 }
@@ -71,8 +70,7 @@ close FH;
 
 
 #----------------------------------------#
-# based on the abundance of genomes,
-# pick reference
+# based on the abundance, pick reference
 #----------------------------------------#
 my $total = 0;
 my %sps = ();
