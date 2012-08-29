@@ -3,6 +3,7 @@
 
 #include "basetypes.hpp"
 
+// initialze (allocate memory) various containers (data structures)
 
 void init(const S2S &ref2seq,
 	  S2VC &ref2vecint,
