@@ -6,7 +6,7 @@ use FindBin qw($Bin);
 my $cmd = "";
  
 print "\n";
-print "# compile libbase for mummer-map\n";
+print "# Compile libbase for mummer-map\n";
 chdir("$Bin/src/mummer-map/libbasedir/");
 my $compile = "gcc";
 my $opt = "-c -o";
@@ -23,7 +23,7 @@ chdir($Bin);
 print "\n";
 
 
-print "# compile stree for mummer-map\n";
+print "# Compile stree for mummer-map\n";
 chdir("$Bin/src/mummer-map/streesrc/");
 $opt = "-I../libbasedir -DSTREEHUGE -c -o";
 my @streepros = ("construct", "access", "scanpref", "linkloc", "depthtab", "ex2leav", "dfs", "overmax", "oversucc", "addleafcount", "iterator");
@@ -39,7 +39,7 @@ chdir($Bin);
 print "\n";
 
 
-print "# compile mummer-map\n";
+print "# Compile mummer-map\n";
 chdir("$Bin/src/mummer-map/mainsrc/");
 $opt = "-I../libbasedir -I../streesrc -c -o";
 my @pros = ("mummer-map", "maxmatopt", "fasta", "findmaxmat", "procmaxmat");
@@ -56,12 +56,15 @@ chdir($Bin);
 print "\n";
 
 
+print "# Install MetaPhyler\n";
 $cmd = "./src/metaphyler/installMetaphyler.pl";
-print "$cmd\n\n";
+print "$cmd\n";
 system($cmd);
+print "\n";
 
+print "# Install MetaCompass\n";
 $cmd = "g++ -Wall -W -O2 -o ./bin/extractSeq ./src/utils/extractSeq.cpp";
-print "$cmd\n\n";
+print "$cmd\n";
 system($cmd);
 
 

@@ -31,7 +31,7 @@ using std::greater;
 #include <utility>
 using std::pair;
 
-const float PCTCUT = 50.0;
+const float PCTCUT = 0;
 
 typedef unsigned short int   Usint;
 typedef unsigned int         Uint;
@@ -181,8 +181,15 @@ void classifyBLAST(string blastfile, S2SI &seq2nlevs, SI2S2VSI &len2seq2scores, 
 	}
       }
     }
+	if (pct >= 95) {
+		confs = VF(nlevs-1, 1.000);
+	}
     if (*max_element(confs.begin(), confs.end()) >= 0.001)
       printClassification(confs, seq2tax.find(rid)->second, qid);
+	else {     
+
+		printClassification(confs, seq2tax.find(rid)->second, qid);
+	}
   }
 }
 
