@@ -1,4 +1,4 @@
- #!/usr/bin/perl
+#!/usr/bin/perl
 
 #############################################
 #
@@ -57,7 +57,7 @@ exit;
 sub Usage {
     die("
 Usage:
-       perl metaCompass.pl <FASTA> <prefix> <mapping> <# iterations> <# threads>
+       perl metacompass.pl <FASTA> <prefix> <mapping> <# iterations> <# threads>
 
 Options:
        <FASTA>        DNA reads in FASTA format.
