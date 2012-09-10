@@ -1,2 +1,40 @@
-perl metacompass.pl test/mockstg.1m.fna test/mockstg.1m /cbcb/personal-scratch/boliu/software/bowtie2-2.0.0-beta5 1 5
+MetaCompass V1.0
+Comparative Assembly for Metagenomic Sequences
+Author: boliu@umiacs.umd.edu
+Date: Sun Sep  9 22:02:11 EDT 2012
 
+
+
+REQUIREMENTS:
+GNU C/C++; Perl; BLAST; Bowtie 2
+
+
+
+INSTALLATION:
+./install.pl
+
+
+
+RUN METACOMPASS:
+-- I have a set of metagenomic reads, and want to perform comparative assembly.
+./metacompass.pl [input FASTA reads] [output prefix] [directory of Bowtie 2] [# iterations] [# threads]
+
+
+-- I know the reference genomes, or I want to perform comparative assembly for a particular genome.
+./bin/compass.pl [input FASTA reads] [reference genome] [output prefix] [directory of Bowtie 2] [# iterations] [# threads]
+
+
+-- You can try MetaCompass on two test data sets.
+For a small data set assuming reference genomes are known:
+./bin/compass.pl ./test/small.reads.fna ./test/small.refgeno.fna ./test/small [directory of Bowtie 2] 1 1
+
+For a big data set assuming reference genomes are known:
+./bin/compass.pl ./test/big.reads.fna ./test/big.refgeno.fna ./test/big [directory of Bowtie 2] 1 1
+
+For a big data set assuming reference genomes are NOT known:
+./metacompass.pl ./test/big.reads.fna ./test/big [directory of Bowtie 2] 1 1
+
+
+
+QUESTIONS:
+Contact Bo Liu at boliu@umiacs.umd.edu

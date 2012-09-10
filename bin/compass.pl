@@ -42,7 +42,7 @@ if ($program eq "mummer-map") {
 
 	if ($i != 1) { my $j = $i - 1; $reffile = "$prefix." . $j . ".newref"; }
 	
-	my $cmd = "$Bin/../src/mummer-map/mummer-map -o $prefix.$i -p $nthreads $reffile $fastafile";
+	my $cmd = "$Bin/mummer-map -o $prefix.$i -p $nthreads $reffile $fastafile";
 	print STDERR "Run mummer-map read mapping\n";
 	print STDERR "$cmd\n";
 	system($cmd);
