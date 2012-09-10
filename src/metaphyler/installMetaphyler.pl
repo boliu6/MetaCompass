@@ -20,6 +20,7 @@ my $cmd = "formatdb -p F -i $Bin/markers/markers.refseq.dna";
 print "$cmd\n";
 system($cmd);
 
+system("mkdir $Bin/bin");
 my $gcc = "g++ -Wall -W -O2";
 my @programs = ("metaphylerClassify", "taxprof");
 foreach my $program (@programs) {
